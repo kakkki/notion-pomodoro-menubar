@@ -20,6 +20,7 @@
 		80B4D97628FBF7F6004B72DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		80B4D97928FBF7F6004B72DF /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		80B4D97B28FBF7F6004B72DF /* notion_pomodoro.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = notion_pomodoro.entitlements; sourceTree = "<group>"; };
+		80B4D98228FBFF0D004B72DF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +53,7 @@
 		80B4D97128FBF7F5004B72DF /* notion-pomodoro */ = {
 			isa = PBXGroup;
 			children = (
+				80B4D98228FBFF0D004B72DF /* Info.plist */,
 				80B4D97228FBF7F5004B72DF /* notion_pomodoroApp.swift */,
 				80B4D97428FBF7F5004B72DF /* ContentView.swift */,
 				80B4D97628FBF7F6004B72DF /* Assets.xcassets */,
@@ -274,6 +276,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "notion-pomodoro/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -301,6 +304,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "notion-pomodoro/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
