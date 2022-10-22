@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import UniformTypeIdentifiers
 
 class ContentViewModel: ObservableObject {
     @Published var taskName: String = "None"
@@ -25,8 +26,11 @@ struct ContentView: View {
                 .imageScale(.large)
                 .foregroundColor(.accentColor)
             
-            Text(contentViewModel.taskName)
-//            Text("メニューバーアプリができた")
+            Button(contentViewModel.taskName) {
+                let pasteboard = NSPasteboard.general
+                pasteboard.declareTypes([NSPasteboard.PasteboardType.string], owner: nil)
+                pasteboard.setString(contentViewModel.taskName, forType: NSPasteboard.PasteboardType.string)
+            }
             
             Button("Start Timer") {
                 startTimerTrigger.send()

@@ -30,8 +30,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     /// ポモドーロが25分なので1タスク1500秒で設定
     static let pomodoroSeconds = 1500
     
-    // iOS, NotionDev, Life Style, etc
-    var taskCategoryName = "NP"
+    // TODO: メニューバータイトルの共通化
+    /// iOS, NotionDev, Life Style, etc
+    var taskName = "NP"
+    var taskCategoryName = "NP[C]"
     
     var remainingTime = pomodoroSeconds
     
@@ -63,7 +65,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         /// テキストは長すぎると空白になってしまうみたい
         /// フォーカスしてるアプリケーションによっては、非表示になってしまう
         /// メニューバーを調整するか、メニューバーにはカウントダウンだけ表示するようにするか調整が必要
-        button.title = "\(taskCategoryName) 25:00"
+        button.title = "\(self.taskName) 25:00"
         
         // アクションの設定
         button.action = #selector(menuButtonAction(sender:))
@@ -96,6 +98,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let categoryName = String(queryWords[1])
         
         contentViewModel.taskName = taskName
+        self.taskName = taskName
         self.taskCategoryName = categoryName
     }
     
@@ -109,7 +112,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             self?.countDownCancellable = timer.sink { [weak self]_ in
                 guard let self else { return }
-                button.title = "\(self.taskCategoryName) \(self.convertSecondsToTime(timeInSeconds: self.remainingTime) ?? "")"
+                button.title = "\(self.taskName) \(self.convertSecondsToTime(timeInSeconds: self.remainingTime) ?? "")"
                 guard self.remainingTime >= 0 else {                    
                     self.finishCountDown(menuBarButton: button)
                     return
@@ -154,6 +157,6 @@ private extension AppDelegate {
     func finishCountDown(menuBarButton: NSStatusBarButton) {
         countDownCancellable?.cancel()
         self.remainingTime = Self.pomodoroSeconds
-        menuBarButton.title = "\(taskCategoryName) \(self.convertSecondsToTime(timeInSeconds: self.remainingTime) )"
+        menuBarButton.title = "\(taskName) \(self.convertSecondsToTime(timeInSeconds: self.remainingTime) )"
     }
 }
