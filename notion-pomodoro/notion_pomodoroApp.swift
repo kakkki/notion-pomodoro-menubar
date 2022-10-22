@@ -26,11 +26,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var popover = NSPopover()
     
 //    private var cancellables: Set<AnyCancellable> = []
-    var remainingTime = 1500
+    
+    /// ポモドーロが25分なので1タスク1500秒で設定
+    static let pomodoroSeconds = 1500
+    
+    var remainingTime = pomodoroSeconds
     
     let startTimerTrigger = PassthroughSubject<Void, Never>()
     var startTimerCancellable: AnyCancellable?
-    var timerCancellable: AnyCancellable?
+    
+    var countDownCancellable: AnyCancellable?
+    
+    let cancelTimerTrigger = PassthroughSubject<Void, Never>()
+    var cancelTimerCancellable: AnyCancellable?
     
     let contentViewModel = ContentViewModel()
 
@@ -40,6 +48,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover.behavior = .transient
         let contentView = ContentView(
             startTimerTrigger: startTimerTrigger,
+            cancelTimerTrigger: cancelTimerTrigger,
             contentViewModel: contentViewModel
         )
         popover.contentViewController = NSHostingController(rootView: contentView)
@@ -86,7 +95,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func addObserver() {
-        print("debug0000 addObserver 15:34")
         startTimerCancellable = startTimerTrigger.sink { [weak self] _ in
             print("debug0000 start Timer")
             
@@ -94,25 +102,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
             
-            self?.timerCancellable = timer.sink { [weak self]_ in
+            self?.countDownCancellable = timer.sink { [weak self]_ in
                 guard let self else { return }
                 button.title = "NP \(self.convertSecondsToTime(timeInSeconds: self.remainingTime) ?? "")"
-                guard self.remainingTime >= 0 else {
-                    print("debug0000 canceled")
-                    
-                    self.timerCancellable?.cancel()
-                    
-                    // 25:00 に戻す
-                    self.remainingTime = 1500
-                    button.title = "NP \(self.convertSecondsToTime(timeInSeconds: self.remainingTime) ?? "")"
+                guard self.remainingTime >= 0 else {                    
+                    self.finishCountDown(menuBarButton: button)
                     return
                 }
                 self.remainingTime -= 1
             }
         }
 //        .store(in: &cancellables)
+        
+        cancelTimerCancellable = cancelTimerTrigger.sink { [weak self] _ in
+            guard let self else { return }
+            guard let button = self.statusBarItem.button else { return }
+            self.finishCountDown(menuBarButton: button)
+        }
     }
-    
+ 
 }
 
 // MARK: Callback
@@ -138,9 +146,9 @@ private extension AppDelegate {
         return String(format: "%02i:%02i", minutes, seconds)
     }
     
-    /// 現状使ってない
-    func cancel() {
-        startTimerCancellable?.cancel()
-//        cancellables.forEach { $0.cancel() }
+    func finishCountDown(menuBarButton: NSStatusBarButton) {
+        countDownCancellable?.cancel()
+        self.remainingTime = Self.pomodoroSeconds
+        menuBarButton.title = "NP \(self.convertSecondsToTime(timeInSeconds: self.remainingTime) )"
     }
 }

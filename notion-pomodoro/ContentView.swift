@@ -15,6 +15,7 @@ class ContentViewModel: ObservableObject {
 struct ContentView: View {
 
     let startTimerTrigger: PassthroughSubject<Void, Never>
+    let cancelTimerTrigger: PassthroughSubject<Void, Never>
     
     @ObservedObject var contentViewModel: ContentViewModel
     
@@ -30,6 +31,10 @@ struct ContentView: View {
             Button("Start Timer") {
                 startTimerTrigger.send()
             }
+            
+            Button("cancel Timer") {
+                cancelTimerTrigger.send()
+            }
         }
         .padding()
     }
@@ -37,6 +42,10 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(startTimerTrigger: PassthroughSubject<Void, Never>(), contentViewModel: ContentViewModel())
+        ContentView(
+            startTimerTrigger: PassthroughSubject<Void, Never>(),
+            cancelTimerTrigger: PassthroughSubject<Void, Never>(),
+            contentViewModel: ContentViewModel()
+        )
     }
 }
