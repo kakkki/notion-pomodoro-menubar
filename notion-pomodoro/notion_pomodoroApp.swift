@@ -30,6 +30,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     /// ポモドーロが25分なので1タスク1500秒で設定
     static let pomodoroSeconds = 1500
     
+    // iOS, NotionDev, Life Style, etc
+    var taskCategoryName = "NP"
+    
     var remainingTime = pomodoroSeconds
     
     let startTimerTrigger = PassthroughSubject<Void, Never>()
@@ -60,7 +63,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         /// テキストは長すぎると空白になってしまうみたい
         /// フォーカスしてるアプリケーションによっては、非表示になってしまう
         /// メニューバーを調整するか、メニューバーにはカウントダウンだけ表示するようにするか調整が必要
-        button.title = "NP 25:00"
+        button.title = "\(taskCategoryName) 25:00"
+        
         // アクションの設定
         button.action = #selector(menuButtonAction(sender:))
         
@@ -81,17 +85,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let url = urls.first,
             let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: true),
             let queryItems = urlComponents.queryItems,
-            let firstQuery = queryItems.first,
-            let newTaskName = firstQuery.value
+            let queries = queryItems[0].value
         else { return }
-        
-        contentViewModel.taskName = newTaskName
 
-        print("debug0000 name: \(firstQuery.name) | value : \(firstQuery.value)")
-//        print("url : \(url.absoluteString)")
-//        print("scheme : \(url.scheme!)")
-//        print("host : \(url.host!)")
-//        print("port : \(url.port!)")
+        let queryWords = queries.split(separator: "_")
+        print("debug0000 split : \(queryWords.description)")
+        
+        guard queryWords.count >= 2 else { return }
+        let taskName = String(queryWords[0])
+        let categoryName = String(queryWords[1])
+        
+        contentViewModel.taskName = taskName
+        self.taskCategoryName = categoryName
     }
     
     func addObserver() {
@@ -104,7 +109,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             self?.countDownCancellable = timer.sink { [weak self]_ in
                 guard let self else { return }
-                button.title = "NP \(self.convertSecondsToTime(timeInSeconds: self.remainingTime) ?? "")"
+                button.title = "\(self.taskCategoryName) \(self.convertSecondsToTime(timeInSeconds: self.remainingTime) ?? "")"
                 guard self.remainingTime >= 0 else {                    
                     self.finishCountDown(menuBarButton: button)
                     return
@@ -149,6 +154,6 @@ private extension AppDelegate {
     func finishCountDown(menuBarButton: NSStatusBarButton) {
         countDownCancellable?.cancel()
         self.remainingTime = Self.pomodoroSeconds
-        menuBarButton.title = "NP \(self.convertSecondsToTime(timeInSeconds: self.remainingTime) )"
+        menuBarButton.title = "\(taskCategoryName) \(self.convertSecondsToTime(timeInSeconds: self.remainingTime) )"
     }
 }
