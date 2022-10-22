@@ -29,8 +29,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     let startTimerTrigger = PassthroughSubject<Void, Never>()
     var startTimerCancellable: AnyCancellable?
+    var timerCancellable: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        print("debug0000 applicationDidFinishLaunching notification : \(notification.description)")
+        
         popover.behavior = .transient
         popover.contentViewController = NSHostingController(rootView: ContentView(startTimerTrigger: startTimerTrigger))
         self.statusBarItem = NSStatusBar.system.statusItem(withLength: CGFloat(NSStatusItem.variableLength))
@@ -52,6 +55,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     ///  no-pomo:// を叩くと動く
     /// @see: https://qiita.com/minami1389227/items/e6b14a5979b35a2470d3
     func application(_ application: NSApplication, open urls: [URL]) {
+        print("debug0000 application open")
         print("debug0000 application open : \(urls.description)")
         // メニューバーアプリが反応したのがわかりやすいようにメニューを開く
         menuButtonAction(sender: self)
@@ -63,10 +67,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 //        print("query : \(url.query!)")
     }
     
-    var timerCancellable: AnyCancellable?
-    
     func addObserver() {
-        print("debug0000 addObserver")
+        print("debug0000 addObserver 15:34")
         startTimerCancellable = startTimerTrigger.sink { [weak self] _ in
             print("debug0000 start Timer")
             
@@ -93,23 +95,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 //        .store(in: &cancellables)
     }
     
-    func cancel() {
-        startTimerCancellable?.cancel()
-//        cancellables.forEach { $0.cancel() }
-    }
-    
-    /// @see https://www.youtube.com/watch?v=_WJzpPgHkhg
-    /// ここでの Combineを使用したカウントダウン処理を参考にした
-    func convertSecondsToTime(timeInSeconds: Int) -> String {
-        let minutes = timeInSeconds / 60
-        let seconds = timeInSeconds % 60
-        return String(format: "%02i:%02i", minutes, seconds)
-    }
 }
 
 // MARK: Callback
 private extension AppDelegate {
     @objc func menuButtonAction(sender: AnyObject) {
+        print("debug0000 menuButtonAction")
         guard let button = self.statusBarItem.button else { return }
         if self.popover.isShown {
             self.popover.performClose(sender)
@@ -119,5 +110,19 @@ private extension AppDelegate {
             // 他の位置をタップすると消える
             self.popover.contentViewController?.view.window?.makeKey()
         }
+    }
+    
+    /// @see https://www.youtube.com/watch?v=_WJzpPgHkhg
+    /// ここでの Combineを使用したカウントダウン処理を参考にした
+    func convertSecondsToTime(timeInSeconds: Int) -> String {
+        let minutes = timeInSeconds / 60
+        let seconds = timeInSeconds % 60
+        return String(format: "%02i:%02i", minutes, seconds)
+    }
+    
+    /// 現状使ってない
+    func cancel() {
+        startTimerCancellable?.cancel()
+//        cancellables.forEach { $0.cancel() }
     }
 }
