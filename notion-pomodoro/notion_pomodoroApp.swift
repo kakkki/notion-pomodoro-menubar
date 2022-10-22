@@ -26,16 +26,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var popover = NSPopover()
     
 //    private var cancellables: Set<AnyCancellable> = []
+    var remainingTime = 1500
     
     let startTimerTrigger = PassthroughSubject<Void, Never>()
     var startTimerCancellable: AnyCancellable?
     var timerCancellable: AnyCancellable?
+    
+    let contentViewModel = ContentViewModel()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         print("debug0000 applicationDidFinishLaunching notification : \(notification.description)")
         
         popover.behavior = .transient
-        popover.contentViewController = NSHostingController(rootView: ContentView(startTimerTrigger: startTimerTrigger))
+        let contentView = ContentView(
+            startTimerTrigger: startTimerTrigger,
+            contentViewModel: contentViewModel
+        )
+        popover.contentViewController = NSHostingController(rootView: contentView)
         self.statusBarItem = NSStatusBar.system.statusItem(withLength: CGFloat(NSStatusItem.variableLength))
         guard let button = self.statusBarItem.button else { return }
         // アイコンの設定
@@ -55,16 +62,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     ///  no-pomo:// を叩くと動く
     /// @see: https://qiita.com/minami1389227/items/e6b14a5979b35a2470d3
     func application(_ application: NSApplication, open urls: [URL]) {
-        print("debug0000 application open")
         print("debug0000 application open : \(urls.description)")
+
         // メニューバーアプリが反応したのがわかりやすいようにメニューを開く
         menuButtonAction(sender: self)
+        startTimerTrigger.send()
         
+        guard
+            let url = urls.first,
+            let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: true),
+            let queryItems = urlComponents.queryItems,
+            let firstQuery = queryItems.first,
+            let newTaskName = firstQuery.value
+        else { return }
+        
+        contentViewModel.taskName = newTaskName
+
+        print("debug0000 name: \(firstQuery.name) | value : \(firstQuery.value)")
 //        print("url : \(url.absoluteString)")
 //        print("scheme : \(url.scheme!)")
 //        print("host : \(url.host!)")
 //        print("port : \(url.port!)")
-//        print("query : \(url.query!)")
     }
     
     func addObserver() {
@@ -74,22 +92,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             guard let button = self?.statusBarItem.button else { return }
             
-            var remainingTime = 3
-            
             let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
             
-            self?.timerCancellable = timer.sink { _ in
-                button.title = "NP \(self?.convertSecondsToTime(timeInSeconds: remainingTime) ?? "")"
-                guard remainingTime >= 0 else {
+            self?.timerCancellable = timer.sink { [weak self]_ in
+                guard let self else { return }
+                button.title = "NP \(self.convertSecondsToTime(timeInSeconds: self.remainingTime) ?? "")"
+                guard self.remainingTime >= 0 else {
                     print("debug0000 canceled")
                     
-                    self?.timerCancellable?.cancel()
+                    self.timerCancellable?.cancel()
                     
                     // 25:00 に戻す
-                    button.title = "NP \(self?.convertSecondsToTime(timeInSeconds: 1500) ?? "")"
+                    self.remainingTime = 1500
+                    button.title = "NP \(self.convertSecondsToTime(timeInSeconds: self.remainingTime) ?? "")"
                     return
                 }
-                remainingTime -= 1
+                self.remainingTime -= 1
             }
         }
 //        .store(in: &cancellables)

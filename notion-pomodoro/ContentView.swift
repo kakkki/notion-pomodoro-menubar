@@ -8,17 +8,24 @@
 import SwiftUI
 import Combine
 
+class ContentViewModel: ObservableObject {
+    @Published var taskName: String = "None"
+}
+
 struct ContentView: View {
 
     let startTimerTrigger: PassthroughSubject<Void, Never>
-
+    
+    @ObservedObject var contentViewModel: ContentViewModel
+    
     var body: some View {
         VStack {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundColor(.accentColor)
-    
-            Text("Hello, world!")
+            
+            Text(contentViewModel.taskName)
+//            Text("メニューバーアプリができた")
             
             Button("Start Timer") {
                 startTimerTrigger.send()
@@ -30,6 +37,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(startTimerTrigger: PassthroughSubject<Void, Never>())
+        ContentView(startTimerTrigger: PassthroughSubject<Void, Never>(), contentViewModel: ContentViewModel())
     }
 }
